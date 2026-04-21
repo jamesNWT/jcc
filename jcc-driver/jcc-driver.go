@@ -14,21 +14,51 @@ func main() {
 
 	lexFlag := flag.Bool("lex", false, lexFlagHelp)
 	parseFlag := flag.Bool("parse", false, parseFlagHelp)
-	codegenFlag := flag.Bool("codegen", false, codeGenFlagHelp)
+	codeGenFlag := flag.Bool("codegen", false, codeGenFlagHelp)
 
 	flag.Parse()
 	
-	inputFileName := flag.Arg(0)
-	outputFileName := inputFile[:len(inputFileName)-1] + "i"
-	commandText = fmt.Sprintf("gcc -E -P $s -o $s", inputFileName, outputFileName)
+	// Run the preprocessor
+	sourceFileName := flag.Arg(0)
+	preprocFileName := sourceFileName[:len(sourceFileName)-1] + "i"
+	commandText := fmt.Sprintf("gcc -E -P $s -o $s", sourceFileName, preprocFileName)
 
 	cmd := exec.Command("bash", "-c", commandText)
 
-	output, err := cmd.Output()
+	_, err := cmd.Output()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// fmt.Println(string(output))
+	// Compile the preprocessed soure file to assembly.
+	assemblyFileName := sourceFileName[:len(sourceFileName)-1] + "s"
+	if *lexFlag {
+		// stubbed
+	}
+	if *parseFlag {
+		// stubbed
+	}
+	if *codeGenFlag {
+		// stubbed 
+	}
+	// DUMMY
+	commandText = fmt.Sprintf("touch $s", assemblyFileName)
+	cmd = exec.Command("bash", "-c", commandText)
+	_, err = cmd.Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Assemble and link the assembly file to produce an executable
+	outputFileName := sourceFileName[:len(sourceFileName)-2]
+
+	commandText = fmt.Sprintf("gcc $s -o $s", assemblyFileName, outputFileName)
+
+	cmd = exec.Command("bash", "-c", commandText)
+	_, err = cmd.Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
