@@ -1,4 +1,4 @@
-package main
+package driver
 
 import (
 	"os/exec"
@@ -7,7 +7,7 @@ import (
 	"flag"
 )
 
-func main() {
+func Driver() {
 	lexFlagHelp := "compilation will run the lexer, but stop before parsing"
 	parseFlagHelp := "compilation will run the lexer and parser, but stop before assembly generation"
 	codeGenFlagHelp := "compilation will run the lexer, parser, and assembly generation, but stop before code emission"
