@@ -1,10 +1,10 @@
 package driver
 
 import (
-	"os/exec"
-	"fmt"
-	"log"
 	"flag"
+	//"fmt"
+	"log"
+	"os/exec"
 )
 
 func Driver() {
@@ -17,22 +17,21 @@ func Driver() {
 	codeGenFlag := flag.Bool("codegen", false, codeGenFlagHelp)
 
 	flag.Parse()
-	
-	// Run the preprocessor
+	 
+	// intermediate file names
 	sourceFileName := flag.Arg(0)
-	preprocFileName := sourceFileName[:len(sourceFileName)-1] + "i"
-	commandText := fmt.Sprintf("gcc -E -P $s -o $s", sourceFileName, preprocFileName)
+	sourceBaseName := sourceFileName[:len(sourceFileName)-1]
+	preprocessedFileName := addExtension(sourceBaseName, "i")
+	assemblyFileName := addExtension(sourceBaseName, "s")
 
-	cmd := exec.Command("bash", "-c", commandText)
-
+	// Run the preprocessor
+	cmd := exec.Command("gcc", "-E", "-P", sourceFileName, "-o", preprocessedFileName)
 	_, err := cmd.Output()
-
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Preprocessor error:", err)
 	}
 
 	// Compile the preprocessed soure file to assembly.
-	assemblyFileName := sourceFileName[:len(sourceFileName)-1] + "s"
 	if *lexFlag {
 		// stubbed
 	}
@@ -40,25 +39,25 @@ func Driver() {
 		// stubbed
 	}
 	if *codeGenFlag {
-		// stubbed 
+		// stubbed
 	}
-	// DUMMY
-	commandText = fmt.Sprintf("touch $s", assemblyFileName)
-	cmd = exec.Command("bash", "-c", commandText)
+	// DUMMY - for now, to test that the driver is working, just invoke gcc
+	// to generate the assembly file
+	cmd = exec.Command("gcc", "-S", "-O", "-fno-asynchronous-unwind-tables", "-fcf-protection=none", sourceFileName)
 	_, err = cmd.Output()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Compilation error:", err)
 	}
 
 	// Assemble and link the assembly file to produce an executable
-	outputFileName := sourceFileName[:len(sourceFileName)-2]
-
-	commandText = fmt.Sprintf("gcc $s -o $s", assemblyFileName, outputFileName)
-
-	cmd = exec.Command("bash", "-c", commandText)
+	cmd = exec.Command("gcc", assemblyFileName, "-o", sourceBaseName)
 	_, err = cmd.Output()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Linking error", err)
 	}
 
+}
+
+func addExtension(baseName, extension string) string {
+	return baseName + "." + extension
 }
